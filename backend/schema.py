@@ -14,11 +14,58 @@ class Query(graphene.ObjectType):
     get_occupation = graphene.Field(OccupationType, occupation_id=graphene.ID())
     get_occupations = graphene.List(OccupationType)
 
-    def resolve_get_occupation(self, info, occupation_id):
+    def resolve_get_occupation(root, info, occupation_id):
         return Occupation.objects.get(id=occupation_id)
 
-    def resolve_get_occupations(self, info):
+    def resolve_get_occupations(root, info):
         return Occupation.objects.all()
 
 
-schema = graphene.Schema(query=Query)
+class OccupationMutation(graphene.Mutation):
+    class Arguments:
+        name = graphene.String(required=True)
+        company_name = graphene.String(required=True)
+        position_name = graphene.String(required=True)
+        hire_date = graphene.Date(required=True)
+        fire_date = graphene.Date()
+        salary = graphene.Int(required=True)
+        fraction = graphene.Int(required=True)
+        base = graphene.Int(required=True)
+        advance = graphene.Int(required=True)
+        by_hours = graphene.Boolean(required=True)
+
+    ok = graphene.Boolean()
+    occupation = graphene.Field(OccupationType)
+
+    def mutate(root,
+               info,
+               name,
+               company_name,
+               position_name,
+               salary,
+               fraction,
+               base,
+               advance,
+               by_hours,
+               hire_date,
+               fire_date=None,):
+        occupation = Occupation.objects.create(
+            name=name,
+            company_name=company_name,
+            position_name=position_name,
+            hire_date=hire_date,
+            fire_date=fire_date,
+            salary=salary,
+            fraction=fraction,
+            base=base,
+            advance=advance,
+            by_hours=by_hours
+        )
+        return OccupationMutation(occupation=occupation, ok=True)
+
+
+class Mutation(graphene.ObjectType):
+    add_occupation = OccupationMutation.Field()
+
+
+schema = graphene.Schema(query=Query, mutation=Mutation)
