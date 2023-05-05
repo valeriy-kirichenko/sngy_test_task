@@ -5,23 +5,36 @@ from employees.models import Occupation
 
 
 class OccupationType(DjangoObjectType):
+    """Класс для связи с моделью Django."""
+
     class Meta:
         model = Occupation
         fields = '__all__'
 
 
 class Query(graphene.ObjectType):
+    """Класс для описания запросов."""
+
     get_occupation = graphene.Field(OccupationType, occupation_id=graphene.ID())
     get_occupations = graphene.List(OccupationType)
 
     def resolve_get_occupation(root, info, occupation_id):
+        """
+        При запросе getOccupation(occupation_id) отдает конкретную
+        запись из БД.
+        """
+
         return Occupation.objects.get(id=occupation_id)
 
     def resolve_get_occupations(root, info):
+        """При запросе getOccupations отдает все записи из БД."""
+
         return Occupation.objects.all()
 
 
 class OccupationMutation(graphene.Mutation):
+    """Мутация для Occupation."""
+
     class Arguments:
         name = graphene.String(required=True)
         company_name = graphene.String(required=True)
@@ -49,6 +62,8 @@ class OccupationMutation(graphene.Mutation):
                by_hours,
                hire_date,
                fire_date=None,):
+        """Возвращает объект мутации с созданным occupation."""
+
         occupation = Occupation.objects.create(
             name=name,
             company_name=company_name,
