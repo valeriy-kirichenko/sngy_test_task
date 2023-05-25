@@ -33,7 +33,7 @@ class Query(graphene.ObjectType):
 
 
 class OccupationMutation(graphene.Mutation):
-    """Мутация для Occupation."""
+    """Мутация для создания Occupation."""
 
     class Arguments:
         name = graphene.String(required=True)
@@ -79,8 +79,44 @@ class OccupationMutation(graphene.Mutation):
         return OccupationMutation(occupation=occupation, ok=True)
 
 
+class UpdateOccupationMutation(graphene.Mutation):
+    """Мутация для обновления Occupation."""
+    
+    class Arguments:
+        id = graphene.ID()
+        name = graphene.String()
+        company_name = graphene.String()
+        position_name = graphene.String()
+        hire_date = graphene.Date()
+        fire_date = graphene.Date()
+        salary = graphene.Int()
+        fraction = graphene.Int()
+        base = graphene.Int()
+        advance = graphene.Int()
+        by_hours = graphene.Boolean()
+
+    ok = graphene.Boolean()
+    occupation = graphene.Field(OccupationType)
+    
+    def mutate(root, info, id, **update_data):
+        """Возвращает объект мутации с обновленным occupation."""
+
+        occupation = Occupation.objects.get(id=id)
+
+        for key, value in update_data.items():
+            if isinstance(update_data[key], bool):
+                setattr(occupation, key, value)
+            else:
+                if update_data[key]:
+                    setattr(occupation, key, value)
+        occupation.save()
+
+        return OccupationMutation(occupation=occupation, ok=True)
+
+
 class Mutation(graphene.ObjectType):
     add_occupation = OccupationMutation.Field()
+    update_occupation = UpdateOccupationMutation.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
