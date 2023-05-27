@@ -21,7 +21,6 @@
     "react": "^18.2.0",
     "sass": "^1.62.1",
     "vue-loader": "^17.1.0",
-    "vuetify": "^3.2.3",
-    "webpack-plugin-vuetify": "^2.0.1"
+    "vuetify": "^3.2.3"
   }
 }
