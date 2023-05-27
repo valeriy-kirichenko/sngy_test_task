@@ -1,7 +1,7 @@
 <template>
   <div>
-    <TheHeader @search="fetchSearch" :selected="selected" />
-    <DataTable @selected="fetchSelected" :search="search" />
+    <TheHeader @search="fetchSearch" @showFired="fetchShowFired" :selected="selected" />
+    <DataTable @selected="fetchSelected" :search="search" :fired="showFired" />
   </div>
 </template>
 
@@ -12,6 +12,7 @@
         setup() {
             const search = ref('')
             const selected = ref([])
+            const showFired = ref()
             const fetchSearch = (event) => {
                 search.value = event
             }
@@ -20,11 +21,17 @@
                 selected.value = event
             }
 
+            const fetchShowFired = (event) => {
+                showFired.value = event
+            }
+
             return {
                 search,
                 selected,
+                showFired,
                 fetchSearch,
-                fetchSelected
+                fetchSelected,
+                fetchShowFired
             }
         }
     }

@@ -19,8 +19,12 @@
       </v-card-text>
       <v-row align="center" justify="space-around">
         <v-checkbox
+          color="success"
+          v-model="show"
           class="mr-2"
-          hide-details label="Показывать уволенных">
+          hide-details label="Показывать уволенных"
+          @change="showFired(show)"
+        >  
         </v-checkbox> 
         <v-row >
           <v-col>
@@ -32,13 +36,19 @@
             </v-btn>
           </v-col>
           <v-col>
-            <v-btn
-              :disabled="!select"
-              class="text-none text-black text-button pa-2"
-              color="green-lighten-3"
-            >
-              Снять с должности {{ selected }}
-            </v-btn>
+            <v-form>
+              <v-btn
+                :disabled="selected.length === 0"
+                class="text-none text-black text-button pa-2"
+                color="rgb(254, 124, 124)"
+                type="submit"
+                @click="fire(selected)"
+              >
+                <span v-if="selected.length <= 1">Снять с должности</span>
+                <span v-else>Снять с должностей</span> 
+              </v-btn>
+            </v-form>
+            
           </v-col>
         </v-row>
       </v-row>
@@ -48,26 +58,47 @@
 
 <script>
     import { ref } from 'vue'
+    import { SET_FIRE_DATE_MUTATION } from '~/queries/queries.js'
 
     export default {
         props: ["selected"],
   
         setup(_, { emit }) {
             const search = ref('')
+            const show = ref()
             const changed = (value) => {
-                emit('search', value)
+              emit('search', value)
             }
-            const isSelected = function() {
-              if (!selected) {
-                return true
+            const showFired = (value) => {
+              emit('showFired', value)
+            }
+
+            const { mutate: setFireDate} = useMutation(SET_FIRE_DATE_MUTATION)
+
+            const fire = function(selected) {
+              for (let id in selected) {
+                setFireDate({id: parseInt(selected[id])})
               }
             }
 
             return {
               search,
               changed,
-              isSelected
+              show,
+              showFired,
+              setFireDate,
+              fire,
             }
         }
     }
 </script>
+
+<style scoped>
+  .v-btn--disabled.v-btn--variant-elevated, .v-btn--disabled.v-btn--variant-flat {
+    background-color: #DDE5ED !important;
+    color: rgba(0, 0, 0, 0.437) !important;
+  }
+  .v-btn {
+    font-weight: 600;
+  }
+</style>

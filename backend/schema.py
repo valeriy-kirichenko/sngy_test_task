@@ -1,3 +1,4 @@
+import datetime
 import graphene
 from graphene_django import DjangoObjectType
 
@@ -80,43 +81,67 @@ class OccupationMutation(graphene.Mutation):
 
 
 class UpdateOccupationMutation(graphene.Mutation):
-    """Мутация для обновления Occupation."""
-    
-    class Arguments:
-        id = graphene.ID()
-        name = graphene.String()
-        company_name = graphene.String()
-        position_name = graphene.String()
-        hire_date = graphene.Date()
-        fire_date = graphene.Date()
-        salary = graphene.Int()
-        fraction = graphene.Int()
-        base = graphene.Int()
-        advance = graphene.Int()
-        by_hours = graphene.Boolean()
+	"""Мутация для обновления Occupation."""
 
-    ok = graphene.Boolean()
-    occupation = graphene.Field(OccupationType)
-    
-    def mutate(root, info, id, **update_data):
-        """Возвращает объект мутации с обновленным occupation."""
+	class Arguments:
+		id = graphene.ID()
+		name = graphene.String()
+		company_name = graphene.String()
+		position_name = graphene.String()
+		hire_date = graphene.Date()
+		fire_date = graphene.String()
+		salary = graphene.Int()
+		fraction = graphene.Int()
+		base = graphene.Int()
+		advance = graphene.Int()
+		by_hours = graphene.Boolean()
 
-        occupation = Occupation.objects.get(id=id)
+	ok = graphene.Boolean()
+	occupation = graphene.Field(OccupationType)
 
-        for key, value in update_data.items():
-            if isinstance(update_data[key], bool):
-                setattr(occupation, key, value)
-            else:
-                if update_data[key]:
-                    setattr(occupation, key, value)
-        occupation.save()
+	def mutate(root, info, id, **update_data):
+		"""Возвращает объект мутации с обновленным occupation."""
 
-        return OccupationMutation(occupation=occupation, ok=True)
+		occupation = Occupation.objects.get(id=id)
+
+		for key, value in update_data.items():
+			if isinstance(update_data[key], bool):
+				setattr(occupation, key, value)
+			else:
+				if update_data[key]:
+					setattr(occupation, key, value)
+
+		occupation.save()
+
+		return UpdateOccupationMutation(occupation=occupation, ok=True)
+
+
+class FireOccupationMutation(graphene.Mutation):
+	"""Мутация для обновления Occupation."""
+
+	class Arguments:
+		id = graphene.Int()
+
+	ok = graphene.Boolean()
+	occupation = graphene.Field(OccupationType)
+
+	def mutate(root, info, id):
+		"""Возвращает объект мутации с обновленным occupation."""
+
+		current_date = datetime.datetime.today()
+		occupation = Occupation.objects.get(id=id)
+
+		occupation = Occupation.objects.get(id=id)
+		occupation.fire_date = current_date
+		occupation.save(update_fields=['fire_date'])
+
+		return FireOccupationMutation(occupation=occupation, ok=True)
 
 
 class Mutation(graphene.ObjectType):
     add_occupation = OccupationMutation.Field()
     update_occupation = UpdateOccupationMutation.Field()
+    fire_occupation = FireOccupationMutation.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

@@ -2,55 +2,69 @@
   <v-card class="px-10" >
     <v-data-table
       v-model="selected"
+      @:change="changedSelect(selected)"
       :items="data.getOccupations"
       :headers="headers"
       :search="search"
+      item-key="id"
       items-per-page-text="Строк на странице"
       show-select
-      @item-selected="changedSelect(selected)"
     >
-      <template v-slot:item.hireDate="{ item }">
-        {{ setDate(item.raw.hireDate) }}
-      </template>
-
-      <template v-slot:item.fireDate="{ item }">
-        {{ setDate(item.raw.fireDate) }}
-      </template>
-
-      <template v-slot:item.salary="{ item }">
-        <SalaryFractionDialog :itemId="item.raw.id" :fireDate="item.raw.fireDate">
-          {{ item.raw.salary.toLocaleString('ru') }} ₽
-          ({{ item.raw.fraction }}%)
-        </SalaryFractionDialog>
-        <span v-if="item.raw.fireDate">
-          {{ item.raw.salary.toLocaleString('ru') }} ₽
-          ({{ item.raw.fraction }}%)
-        </span>
-      </template>
-
-      <template v-slot:item.base="{ item }">
-        <BaseDialog :itemId="item.raw.id" :fireDate="item.raw.fireDate">
-          {{ item.raw.base.toLocaleString('ru') }} ₽
-        </BaseDialog>
-        <span v-if="item.raw.fireDate">
-          {{ item.raw.base.toLocaleString('ru') }} ₽
-        </span>
-      </template>
-
-      <template v-slot:item.advance="{ item }">
-        <AdvanceDialog :itemId="item.raw.id" :fireDate="item.raw.fireDate">
-          {{ item.raw.advance.toLocaleString('ru') }} ₽
-        </AdvanceDialog>
-        <span v-if="item.raw.fireDate">
-          {{ item.raw.advance.toLocaleString('ru') }} ₽
-        </span>
-      </template>
-
-      <template v-slot:item.byHours="{ item }">
-        <v-checkbox-btn
-          v-model="item.raw.byHours"
-          @click="setByHours({id: item.raw.id, byHours: !item.raw.byHours})"
-        ></v-checkbox-btn>
+      <template v-slot:item="{ item }">
+        <tr v-if="showFired(fired, item.raw.fireDate)" :class="trClass(item.raw.fireDate)">
+          <td>
+            <v-checkbox
+              v-model="selected"
+              v-if="!item.raw.fireDate"
+              
+              :value="item.raw.id"
+            />
+          </td>
+          <td>{{ item.raw.name }}</td>
+          <td>{{ item.raw.companyName }}</td>
+          <td>{{ item.raw.positionName }}</td>
+          <td>{{ setDate(item.raw.hireDate) }}</td>
+          <td>{{ setDate(item.raw.fireDate) }}</td>
+          <td>
+            <SalaryFractionDialog
+              :itemId="item.raw.id"
+              :fireDate="item.raw.fireDate"
+            >
+              {{ item.raw.salary.toLocaleString('ru') }} ₽
+              ({{ item.raw.fraction.toLocaleString('ru') }}%)
+            </SalaryFractionDialog>
+            <span v-if="item.raw.fireDate">
+              {{ item.raw.salary.toLocaleString('ru') }} ₽
+              ({{ item.raw.fraction }}%)
+            </span>
+          </td>
+          <td>
+            <BaseDialog :itemId="item.raw.id" :fireDate="item.raw.fireDate">
+              {{ item.raw.base.toLocaleString('ru') }} ₽
+            </BaseDialog>
+            <span v-if="item.raw.fireDate">
+              {{ item.raw.base.toLocaleString('ru') }} ₽
+            </span>
+          </td>
+          <td>
+            <AdvanceDialog :itemId="item.raw.id" :fireDate="item.raw.fireDate">
+              {{ item.raw.advance.toLocaleString('ru') }} ₽
+            </AdvanceDialog>
+            <span v-if="item.raw.fireDate">
+              {{ item.raw.advance.toLocaleString('ru') }} ₽
+            </span>
+          </td>
+          <td>
+            <v-checkbox-btn
+              :disabled="isFired(item.raw.fireDate)"
+              v-model="item.raw.byHours"
+              color="success"
+              @click="setByHours(
+                {id: item.raw.id, byHours: !item.raw.byHours}
+              )"
+            ></v-checkbox-btn>
+          </td>
+        </tr>
       </template>
     </v-data-table>
   </v-card>
@@ -68,7 +82,7 @@
 
   export default {
     components: {AdvanceDialog, BaseDialog, SalaryFractionDialog},
-    props: ["search"],
+    props: ["search", "item", "fired"],
 
     setup(_, { emit }) {
       const { mutate: setByHours } = useMutation(SET_BY_HOURS_MUTATION)
@@ -97,17 +111,48 @@
       }
 
       const changedSelect = function(value) {
-                emit('selected', value)
-            }
+          emit('selected', value)
+      }
 
+      const trClass = function(fire) {
+        if (fire) {
+          return "red"
+        }
+      }
+
+      const showFired = function(fired, data) {
+        if (fired) {
+          return true
+        }
+        if (!fired && data) {
+          return false
+        }
+        else {
+          return true
+        }
+      }
+
+      const isFired = function(fired) {
+        if (fired) {
+          return true
+        }
+      }
+      
       return {
         data,
         selected,
         headers,
         setDate,
         setByHours,
-        changedSelect
+        changedSelect,
+        trClass,
+        showFired,
+        isFired
       }
     }
   }
 </script>
+
+<style scoped>
+  .red td {background-color:rgb(254, 124, 124) !important;}
+</style>

@@ -91,3 +91,22 @@ export const SET_SALARY_FRACTION_MUTATION = gql`
             }
     }
 `
+
+export const SET_FIRE_DATE_MUTATION = gql`
+mutation FireOccupationMutation ($id: Int!) {
+    fireOccupation (id: $id) {
+            occupation {
+                name
+                companyName
+                positionName
+                salary
+                fraction
+                base
+                advance
+                byHours
+                hireDate
+                fireDate
+            }
+    }
+}
+`
