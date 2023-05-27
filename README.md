@@ -32,7 +32,11 @@ npm install
 cd ../backend/
 python3 manage.py migrate
 ```
-5. Запустить проект:
+5. Загрузить тестовые данные:
+```bash
+python3 manage.py loaddata data.json
+```
+6. Запустить проект:
 ```bash
 python3 manage.py runserver
 
