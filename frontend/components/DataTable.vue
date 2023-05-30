@@ -3,7 +3,7 @@
     <v-data-table
       v-model="selected"
       @:change="changedSelect(selected)"
-      :items="data.getOccupations"
+      :items="correctData(data.getOccupations)"
       :headers="headers"
       :search="search"
       :custom-filter="filterByName"
@@ -90,19 +90,19 @@
       const { data } = useAsyncQuery(GET_ALL_OCCUPATIONS_QUERY)
       const selected = ref([])
       const headers = [
-        {
-          title: 'Сотрудники',
-          key: 'name',
-          align: 'start',
-        },
-        {title: 'Компания', key: 'companyName'},
-        {title: 'Должность', key: 'positionName'},
-        {title: 'Дата приёма', key: 'hireDate'},
-        {title: 'Дата увольнения', key: 'fireDate'},
-        {title: 'Ставка', key: 'salary'},
-        {title: 'База', key: 'base'},
-        {title: 'Аванс', key: 'advance'},
-        {title: 'Почасовая', key: 'byHours'},
+          {
+              title: 'Сотрудники',
+              key: 'name',
+              align: 'start',
+          },
+          {title: 'Компания', key: 'companyName'},
+          {title: 'Должность', key: 'positionName'},
+          {title: 'Дата приёма', key: 'sortableHireDate'},
+          {title: 'Дата увольнения', key: 'sortableFireDate'},
+          {title: 'Ставка', key: 'salary'},
+          {title: 'База', key: 'base'},
+          {title: 'Аванс', key: 'advance'},
+          {title: 'Почасовая', key: 'byHours'},
       ]
 
       const setDate = function(date) {
@@ -116,32 +116,53 @@
       }
 
       const trClass = function(fire) {
-        if (fire) {
-          return "red"
-        }
+          if (fire) {
+              return "red"
+          }
       }
 
       const showFired = function(fired, data) {
-        if (fired) {
-          return true
-        }
-        if (!fired && data) {
-          return false
-        }
-        else {
-          return true
-        }
+          if (fired) {
+              return true
+          }
+          if (!fired && data) {
+              return false
+          }
+          else {
+              return true
+          }
       }
 
       const isFired = function(fired) {
-        if (fired) {
-          return true
-        }
+          if (fired) {
+              return true
+          }
       }
 
       const filterByName = function(_, query, { raw }) {
-        return raw.name.toLowerCase().includes(query.toLowerCase())
+          return raw.name.toLowerCase().includes(query.toLowerCase())
       }
+
+      const correctData = function(data) {
+          console.log(data)
+          return data.map((d) => {
+            return {
+              ...d,
+              sortableFireDate: sortableDate(d.fireDate),
+              sortableHireDate: sortableDate(d.hireDate),
+            }
+          })
+      }
+
+      const sortableDate = function(date) {
+          if (!date) {
+              return "0"
+          }
+          else {
+              return date
+          }
+      }
+
 
       return {
         data,
@@ -153,7 +174,8 @@
         trClass,
         showFired,
         isFired,
-        filterByName
+        filterByName,
+        correctData
       }
     }
   }
