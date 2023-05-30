@@ -144,7 +144,6 @@
       }
 
       const correctData = function(data) {
-          console.log(data)
           return data.map((d) => {
             return {
               ...d,
