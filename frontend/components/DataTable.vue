@@ -6,6 +6,7 @@
       :items="data.getOccupations"
       :headers="headers"
       :search="search"
+      :custom-filter="filterByName"
       item-key="id"
       items-per-page-text="Строк на странице"
       show-select
@@ -137,7 +138,11 @@
           return true
         }
       }
-      
+
+      const filterByName = function(_, query, { raw }) {
+        return raw.name.toLowerCase().includes(query.toLowerCase())
+      }
+
       return {
         data,
         selected,
@@ -147,7 +152,8 @@
         changedSelect,
         trClass,
         showFired,
-        isFired
+        isFired,
+        filterByName
       }
     }
   }
