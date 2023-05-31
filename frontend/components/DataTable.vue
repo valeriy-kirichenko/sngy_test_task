@@ -10,6 +10,7 @@
       item-key="id"
       items-per-page-text="Строк на странице"
       show-select
+      item-sortable="sortable"
     >
       <template v-slot:item="{ item }">
         <tr v-if="showFired(fired, item.raw.fireDate)" :class="trClass(item.raw.fireDate)">
@@ -17,7 +18,6 @@
             <v-checkbox
               v-model="selected"
               v-if="!item.raw.fireDate"
-              
               :value="item.raw.id"
             />
           </td>
@@ -137,6 +137,7 @@
           if (fired) {
               return true
           }
+          else return false
       }
 
       const filterByName = function(_, query, { raw }) {
@@ -149,6 +150,7 @@
               ...d,
               sortableFireDate: sortableDate(d.fireDate),
               sortableHireDate: sortableDate(d.hireDate),
+              sortable: isFired(!d.fireDate)
             }
           })
       }
