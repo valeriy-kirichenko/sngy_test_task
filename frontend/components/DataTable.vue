@@ -2,22 +2,22 @@
   <v-card class="px-10" >
     <v-data-table
       v-model="selected"
-      @:change="changedSelect(selected)"
+      @change="changedSelect(selected)"
       :items="correctData(data.getOccupations)"
       :headers="headers"
       :search="search"
       :custom-filter="filterByName"
       item-key="id"
       items-per-page-text="Строк на странице"
+      item-selectable="selectable"
       show-select
-      item-sortable="sortable"
     >
       <template v-slot:item="{ item }">
         <tr v-if="showFired(fired, item.raw.fireDate)" :class="trClass(item.raw.fireDate)">
           <td>
             <v-checkbox
               v-model="selected"
-              v-if="!item.raw.fireDate"
+              :disabled="!item.raw.selectable"
               :value="item.raw.id"
             />
           </td>
@@ -150,7 +150,7 @@
               ...d,
               sortableFireDate: sortableDate(d.fireDate),
               sortableHireDate: sortableDate(d.hireDate),
-              sortable: isFired(!d.fireDate)
+              selectable: isFired(!d.fireDate)
             }
           })
       }
@@ -163,7 +163,6 @@
               return date
           }
       }
-
 
       return {
         data,
