@@ -1,24 +1,39 @@
 <template>
-  <v-card class="px-10" >
+  <v-card class="px-10">
     <v-data-table
       v-model="selected"
-      @change="changedSelect(selected)"
       :items="correctData(data.getOccupations)"
       :headers="headers"
       :search="search"
       :custom-filter="filterByName"
       item-key="id"
       items-per-page-text="Строк на странице"
-      item-selectable="selectable"
-      show-select
     >
+      
+      <template v-slot:headers="{ columns }">
+        <tr>
+          <th>
+            <v-checkbox-btn
+              v-model="isAllSelected"
+              @click="selectAll(selected)"
+            />
+          </th>
+          <th v-for="column in columns">
+            {{ column.title }}
+          </th>
+        </tr>
+      </template>
       <template v-slot:item="{ item }">
-        <tr v-if="showFired(fired, item.raw.fireDate)" :class="trClass(item.raw.fireDate)">
+        <tr
+          v-if="showFired(fired, item.raw.fireDate)"
+          :class="trClass(item.raw.fireDate)"
+        >
           <td>
-            <v-checkbox
+            <v-checkbox-btn
               v-model="selected"
-              :disabled="!item.raw.selectable"
+              v-if="item.raw.selectable"
               :value="item.raw.id"
+              @change="updateIsAllSelected(selected)"
             />
           </td>
           <td>{{ item.raw.name }}</td>
@@ -89,6 +104,8 @@
       const { mutate: setByHours } = useMutation(SET_BY_HOURS_MUTATION)
       const { data } = useAsyncQuery(GET_ALL_OCCUPATIONS_QUERY)
       const selected = ref([])
+      const count = ref(0)
+      let isAllSelected = ref()
       const headers = [
           {
               title: 'Сотрудники',
@@ -164,9 +181,38 @@
           }
       }
 
+      const selectAll = function(selected) {
+          selected.splice(0)
+
+          if (!isAllSelected.value) {
+              correctData(data.value.getOccupations).forEach((item) => {
+                  if (item.selectable) {
+                    selected.push(item.id)
+                  }
+              })
+          }
+          emit('selected', selected)
+      }
+
+      const updateIsAllSelected = function(selected) {
+          let selectable_items = []
+          correctData(data.value.getOccupations).forEach((item) => {
+                  if (item.selectable) {
+                    selectable_items.push(item.id)
+                  }
+              })
+          if (selected.length == selectable_items.length) {
+              isAllSelected.value = true
+          }
+          else isAllSelected.value = false
+
+          emit('selected', selected)  
+      }
+
       return {
         data,
         selected,
+        isAllSelected,
         headers,
         setDate,
         setByHours,
@@ -175,7 +221,9 @@
         showFired,
         isFired,
         filterByName,
-        correctData
+        correctData,
+        selectAll,
+        updateIsAllSelected
       }
     }
   }
