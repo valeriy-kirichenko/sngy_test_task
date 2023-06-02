@@ -8,20 +8,14 @@
       :custom-filter="filterByName"
       item-key="id"
       items-per-page-text="Строк на странице"
+      show-select
     >
-      
-      <template v-slot:headers="{ columns }">
-        <tr>
-          <th>
-            <v-checkbox-btn
-              v-model="isAllSelected"
-              @click="selectAll(selected)"
-            />
-          </th>
-          <th v-for="column in columns">
-            {{ column.title }}
-          </th>
-        </tr>
+      <template v-slot:column.data-table-select>
+        <v-checkbox-btn
+          class="ma-2"
+          v-model="isAllSelected"
+          @click="selectAll(selected)"
+        />
       </template>
       <template v-slot:item="{ item }">
         <tr
@@ -104,13 +98,12 @@
       const { mutate: setByHours } = useMutation(SET_BY_HOURS_MUTATION)
       const { data } = useAsyncQuery(GET_ALL_OCCUPATIONS_QUERY)
       const selected = ref([])
-      const count = ref(0)
       let isAllSelected = ref()
       const headers = [
           {
               title: 'Сотрудники',
               key: 'name',
-              align: 'start',
+              
           },
           {title: 'Компания', key: 'companyName'},
           {title: 'Должность', key: 'positionName'},
